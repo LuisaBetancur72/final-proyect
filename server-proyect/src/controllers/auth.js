@@ -1,8 +1,10 @@
 const bcrypt = require("bcryptjs");
 const User = require("../models/user");
 const jwt = require("../utils/jwt");
+const axios = require ("axios");
 
-const { firstname, lastname, email, departamento, municipio, password } = req.body;
+const register = async (req, res) => {
+  const { firstname, lastname, email, departamento, municipio, password } = req.body;
 
   if (!email) res.status(400).send({ msg: "El email es requerido" });
   if (!password) res.status(400).send({ msg: "La contraseñas es requerida" });
@@ -11,7 +13,6 @@ const { firstname, lastname, email, departamento, municipio, password } = req.bo
   const api_data = response.data;
   const dpto = api_data.find(api_data =>{ return api_data.departamento === departamento});
   const mun = api_data.find(api_data =>{return api_data.municipio === municipio});
-
   const salt = bcrypt.genSaltSync(10);
   const hashPassword = bcrypt.hashSync(password, salt);
 
@@ -25,15 +26,13 @@ const { firstname, lastname, email, departamento, municipio, password } = req.bo
       active: false,
       password: hashPassword,
   });
-
   try {
       const userStorage = await user.save();
       res.status(201).send(userStorage);
   } catch (error) {
       res.status(400).send({ msg: "Error al crear el usuario", error });
   }
-
-
+}
 const login = async (req, res) => {
 const { email, password } = req.body;
 
